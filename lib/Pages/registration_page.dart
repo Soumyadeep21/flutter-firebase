@@ -1,6 +1,8 @@
+import 'package:firebase_flutter/Utils/auth.dart';
 import 'package:firebase_flutter/Utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_flutter/Utils/user_management.dart';
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -8,10 +10,33 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
+  String _email, _password, _name;
+  Auth auth = Auth();
+  final formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
+  }
+
+  void _submit() {
+    final form = formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      _register();
+    }
+  }
+
+  void _register() async {
+    await auth.createUser(_email, _password).then((user) {
+      UserManagement().updateUserInfo(user, _name,
+          "https://greatzoo.org/media/library/fluid-ext-editor-widget/64/image/AdobeStock_59396481.jpeg?23");
+      auth.signOut();
+      Navigator.of(context).pop();
+    }).catchError((e) {
+      print(e.toString());
+    });
   }
 
   @override
@@ -21,6 +46,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Form(
+          key: formKey,
           child: Column(
             children: <Widget>[
               Container(
@@ -95,6 +121,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             )
                           ]),
                       child: TextFormField(
+                        onSaved: (val) => _name = val,
                         decoration: InputDecoration(
                             border: InputBorder.none,
                             icon: Icon(
@@ -120,6 +147,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             )
                           ]),
                       child: TextFormField(
+                        onSaved: (value) => _email = value,
+                        validator: (val) =>
+                            !val.contains('@') ? "Invalid Email" : null,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                             border: InputBorder.none,
@@ -146,6 +176,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             )
                           ]),
                       child: TextFormField(
+                        onSaved: (value) => _password = value,
+                        validator: (val) =>
+                            val.length < 6 ? "Password too short" : null,
                         obscureText: true,
                         decoration: InputDecoration(
                             border: InputBorder.none,
@@ -170,7 +203,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () {},
+                            onTap: _submit,
                             child: Center(
                                 child: Text(
                               "REGISTER",

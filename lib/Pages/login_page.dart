@@ -5,6 +5,7 @@ import 'package:firebase_flutter/Utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -20,6 +21,22 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
+  }
+
+  void _submit() {
+    final form = formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      _login();
+    }
+  }
+
+  void _login() async {
+    await auth.signIn(_email, _password).then((user) {
+      print(user.email);
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
+    });
   }
 
   @override
@@ -86,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Container(
-                height: height / 2,
+                height: height / 1.7,
                 padding: EdgeInsets.only(top: 50.0),
                 child: Column(
                   children: <Widget>[
@@ -191,7 +208,20 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    Spacer()
+                    Spacer(),
+                    IconButton(
+                      onPressed: () async {
+                        await auth.googleSignIn().then((user) {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => HomePage()));
+                        });
+                      },
+                      icon: Icon(
+                        MdiIcons.google,
+                        color: Colors.blue,
+                        size: 40,
+                      ),
+                    ),
                   ],
                 ),
               )
@@ -200,21 +230,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  void _submit() {
-    final form = formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      _login();
-    }
-  }
-
-  void _login() async {
-    await auth.signIn(_email, _password).then((user) {
-      print(user.email);
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
-    });
   }
 }

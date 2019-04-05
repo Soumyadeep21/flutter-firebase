@@ -16,6 +16,30 @@ class Auth {
     return user;
   }
 
+  Future<FirebaseUser> createUser(String email, String password) async {
+    FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email, password: password);
+    return user;
+  }
+
+  Future<void> signOut() async {
+    return await _firebaseAuth.signOut();
+  }
+
+  Future<void> sendEmailVerification() async {
+    FirebaseUser user = await _firebaseAuth.currentUser();
+    return await user.sendEmailVerification();
+  }
+
+  Future<void> resetPassword(String email) async {
+    return await _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<bool> isEmailVerified() async {
+    FirebaseUser user = await _firebaseAuth.currentUser();
+    return user.isEmailVerified;
+  }
+
   Future<FirebaseUser> googleSignIn() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
